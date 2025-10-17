@@ -1,55 +1,30 @@
-import axios from "axios";
-
 export default async function handler(req, res) {
-  try {
-    // 1. Get pages from category that contains image files
-    const category = "Otter_pictures"; // might need adjusting
-    const listResp = await axios.get("https://otter.wiki/api.php", {
-      params: {
-        action: "query",
-        format: "json",
-        list: "categorymembers",
-        cmtitle: `Category:${category}`,
-        cmlimit: 50,
-      },
-    });
+  // 1. Pick a random otter ID (adjust max if more exist)
+  const id = Math.floor(Math.random() * 1020) + 1;
 
-    const pages = listResp.data.query.categorymembers;
+  // 2. Try possible extensions (.jpg first, .gif as fallback)
+  const tryExtensions = async (extensions) => {
+    for (const ext of extensions) {
+      const imgUrl = `https://otter.wiki/otters/${id}.${ext}`;
+      const response = await fetch(imgUrl);
 
-    if (!pages || pages.length === 0) {
-      return res.status(404).json({ error: "No otter images found" });
-    }
-
-    // 2. Pick a random image page
-    const chosen = pages[Math.floor(Math.random() * pages.length)];
-
-    // 3. Get image info
-    const imageResp = await axios.get("https://otter.wiki/api.php", {
-      params: {
-        action: "query",
-        format: "json",
-        prop: "imageinfo",
-        titles: chosen.title,
-        iiprop: "url"
+      if (response.ok) {
+        const buffer = await response.arrayBuffer();
+        res.setHeader("Content-Type", ext === "gif" ? "image/gif" : "image/jpeg");
+        res.setHeader("Content-Disposition", `inline; filename="otter_${id}.${ext}"`);
+        res.status(200).send(Buffer.from(buffer));
+        return; // stop once one image worked
       }
-    });
-
-    const pagesObj = imageResp.data.query.pages;
-    const imagePage = Object.values(pagesObj)[0];
-    const imageUrl = imagePage.imageinfo?.[0]?.url;
-
-    if (!imageUrl) {
-      return res.status(404).json({ error: "No image URL found" });
     }
 
-    // 4. Proxy the image to Discord
-    const imgResp = await axios.get(imageUrl, { responseType: "arraybuffer" });
-    res.setHeader("Content-Type", "image/jpeg");
-    res.setHeader("Content-Disposition", 'inline; filename="otter.jpg"');
-    res.status(200).send(imgResp.data);
+    // If neither file exists
+    res.status(404).json({ error: "Otter not found :(" });
+  };
 
+  try {
+    await tryExtensions(["jpg", "gif"]);
   } catch (err) {
-    console.error("Otter fail:", err.message);
-    res.status(500).json({ error: "Otter not found" });
+    console.error("Otter fetch error:", err.message);
+    res.status(500).json({ error: "Otter server error" });
   }
 }
