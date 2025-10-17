@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
-  // random ID between 1 and ~2000
-  const id = Math.floor(Math.random() * 2000) + 1;
+  // random ID between 1 and ~1230
+  const id = Math.floor(Math.random() * 1230) + 1;
 
   // randomly decide order: jpg → gif or gif → jpg
   const extOrder = Math.random() < 0.5 ? ["jpg", "gif"] : ["gif", "jpg"];
