@@ -4,7 +4,8 @@
 
 # Random Otters?
 
-A simple addition to a custom command running on the Discord Server ΛVΛRIΛ - linked above - to display a random picked image through [Otter Wiki made by celeste](https://otter.wiki/) with a custom filtering!
+A simple addition to a custom command running on the Discord Server ΛVΛRIΛ - linked above - to display a random picked image from the [Otter Wiki made by celeste](https://otter.wiki/)
+
 
 > [!IMPORTANT]
 > **Show some love to the Original Creator of the Wiki** \
